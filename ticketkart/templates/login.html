@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TicketKart - book your tickets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <style>
+      .navbar {
+        background-image: linear-gradient(to left, darkslategrey, black);
+      }
+      #body {
+        background-color: darkslategray;
+      }
+      .new {
+        max-width: 400px;
+        max-height: 200px;
+      }
+      .card-text {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary navbar-dark">
+      <div class="container-fluid">
+        <h3 class="text-white">
+          <a href="/" class="text-white navbar-brand">
+            <img src="/images/logo-white.png" width="40px"
+            height="40px" alt="" srcset="">
+            ticketKart</a>
+        </h3>
+        <div class="justify-content-end">
+          {% if request.user.is_authenticated %}
+          <div class="btn-group dropstart">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <img
+            src="{{request.user.avatar.url}}"
+            alt="Profile Picture"
+            width="40px"
+            height="40px"
+            style="border-radius: 50%"
+          />
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'update-user' %}">Update Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'cart-detail' %}">My Cart</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+          </div>
+          {% else %}
+
+          <!-- Not Logged In -->
+          <div class="justify-content-end">
+            <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-light"
+              >Register</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    <nav class="navbar bg-body-tertiary py-5 navbar-dark">
+      <div class="container-fluid">
+        <form class="container-fluid" action="/" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Location"
+              value=""
+              name="location"
+            />
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Concert Name"
+              aria-label="Username"
+              name="concert"
+            />
+            <input
+              type="date"
+              class="form-control me-2"
+              placeholder="yyyy-mm-dd"
+              name="date"
+            />
+            <button type="submit" class="btn btn-secondary" value="grey">
+              Search
+            </button>
+          </div>
+        </form>
+        <br />
+      </div>
+    </nav>
+    <br />
+      <div class="container col-md-8" >
+        <div>
+            <form method="POST" action="">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Username:</label>
+                <input
+                  class="form-control form-control-lg"
+                  type="text"
+                  name="username"
+                  placeholder="User Name"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Password:</label>
+                <input
+                  class="form-control form-control-lg"
+                  type="password"
+                  name="password"
+                  placeholder="Enter Password"
+                />
+              </div>
+              <div class="mb-3">
+                <button type="submit" class="btn btn-success d-grid gap-2 col-3 mx-auto">
+                  Login
+                </button>
+              </div>
+            </form>
+            <br />
+            <div style="text-align: center;">
+            <span>haven't signed up yet?</span>
+            <a
+              href="{% url 'register' %}"
+              class=""
+              >Sign Up</a
+            >
+            </div>
+          </div>
+    </div>
+        
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+  <script>
+    function addBootstrapStyles() {
+  const formElements = document.querySelectorAll('input, select, textarea');
+
+  formElements.forEach((element) => {
+    if (element.type === 'checkbox' || element.type === 'radio') {
+      element.classList.add('form-check-input');
+    } else if (element.tagName.toLowerCase() === 'select') {
+      element.classList.add('form-select');
+    } else {
+      element.classList.add('form-control');
+    }
+  });
+
+  const formGroups = document.querySelectorAll('.form-group');
+
+  formGroups.forEach((group) => {
+    group.classList.add('mb-3');
+  });
+
+  const buttons = document.querySelectorAll('button, input[type="submit"], input[type="reset"]');
+
+  buttons.forEach((button) => {
+    button.classList.add('btn', 'btn-primary');
+  });
+}
+window.addEventListener('load', addBootstrapStyles);
+  </script>
+</body>
+</html>

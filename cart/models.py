@@ -1,35 +1,56 @@
+import uuid
+from django.db.models import Sum, F
 from django.db import models
 from ticketkartapp.models import User
 from concert.models import ConcertTicket
 
 class Cart(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer = models.OneToOneField(User, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.customer.name}'s Cart"
+    
+    @property
+    def cart_total(self):
+        return self.cartitem_set.annotate(
+            item_total=F('quantity') * F('ticket__price')
+        ).aggregate(total=Sum('item_total'))['total']
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     ticket = models.ForeignKey(ConcertTicket, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
 
-class Order(models.Model):
-    PAYMENT_STATUS_PENDING = 'P'
-    PAYMENT_STATUS_COMPLETE = 'C'
-    PAYMENT_STATUS_FAILED = 'F'
-    PAYMENT_STATUS_CHOICES = [
-        (PAYMENT_STATUS_PENDING, 'Pending'),
-        (PAYMENT_STATUS_COMPLETE, 'Complete'),
-        (PAYMENT_STATUS_FAILED, 'Failed')
-    ]
+    def __str__(self):
+        return f'{str(self.ticket)}'
 
+
+
+class Order(models.Model):
     placed_at = models.DateTimeField(auto_now_add=True)
-    payment_status = models.CharField(
-        max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     customer = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    @property
+    def order_total(self):
+        return self.orderitem_set.annotate(
+            item_total=F('quantity') * F('ticket__price')
+        ).aggregate(total=Sum('item_total'))['total']
+    
+    def __str__(self) -> str:
+        return f"{self.customer.name}'s order Placed at {self.placed_at}"
 
 
 class OrderItem(models.Model):
+    uniq_uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     ticket = models.ForeignKey(ConcertTicket, on_delete=models.PROTECT)
     quantity = models.PositiveSmallIntegerField()
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    @property
+    def unit_price(self):
+        return self.ticket.price
+    
+    def __str__(self):
+        return f'{str(self.ticket.concert.name)} - {self.ticket.seat_type}- {self.quantity}'

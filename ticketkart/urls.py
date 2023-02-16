@@ -17,9 +17,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from cart.views import add_to_cart, cart_detail, remove_item, update_item, checkout
+from .views import home, RegisterCustomer, user_logout, loginPage, updateUser, updateUserPwd
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('__debug__/', include('debug_toolbar.urls')),
+    path('',home,name="home"),
+    path('add-to-cart/<int:concert_id>',add_to_cart, name="add-to-cart"),
+    path('cart-detail/',cart_detail, name="cart-detail"),
+    path('remove-item/<int:item_id>',remove_item, name="remove-item"),
+    path('update-item/<int:item_id>',update_item, name="update-item"),
+    path('checkout/',checkout, name='checkout' ),
+    path('register/',RegisterCustomer, name="register"),
+    path('logout/',user_logout, name='logout'),
+    path('login/',loginPage,name="login"),
+    path('update-user/',updateUser,name='update-user'),
+    path('change-password',updateUserPwd, name='change-password'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

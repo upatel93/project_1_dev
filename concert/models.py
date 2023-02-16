@@ -26,18 +26,27 @@ class Concert(models.Model):
         seats = (self.total_seats - self.sold_seats)
         return seats
 
-    
+    def increase_sold_seats(self, quantity):
+        self.sold_seats += quantity
+        self.save()
+
+        
     def __str__(self):
         return f"{self.name} - {self.venue.name}."
 
 class ConcertTicket(models.Model):
     seat_type = models.ForeignKey(SeatType, on_delete=models.CASCADE)
-    concert = models.ForeignKey(Concert, on_delete=models.CASCADE)
+    concert = models.ForeignKey(Concert, on_delete=models.CASCADE, related_name='seats')
     price = models.DecimalField(max_digits=5, decimal_places=2)
 
     def clean(self):
         if self.seat_type.venue != self.concert.venue:
             raise ValidationError("Seat type must be from the same venue as the concert.")
 
-    def __ste__(self):
-        return f"{self.concert} - {self.seat_type} - {self.price}."
+    def __str__(self):
+        return f"{self.concert} - {self.price}."
+    
+    def seats_left(self):
+        left = self.concert.available_seats
+        return left
+    

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{cart}} Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <style>
+      .navbar {
+        background-image: linear-gradient(to left, darkslategrey, black);
+      }
+      #body {
+        background-color: darkslategray;
+      }
+
+      .errors{
+        list-style-type: disc;
+        color: #f44336;
+      }
+
+      .new {
+        max-width: 400px;
+        max-height: 200px;
+      }
+      .card-text {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary navbar-dark">
+      <div class="container-fluid">
+        <h3 class="text-white">
+          <a href="/" class="text-white navbar-brand">
+            <img src="/images/logo-white.png" width="40px"
+            height="40px" alt="" srcset="">
+            ticketKart</a>
+          </h3>
+        <div class="justify-content-end">
+          {% if request.user.is_authenticated %}
+          <div class="btn-group dropstart">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <img
+            src="{{request.user.avatar.url}}"
+            alt="Profile Picture"
+            width="40px"
+            height="40px"
+            style="border-radius: 50%"
+          />
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'cart-detail' %}">My Cart</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'update-user' %}">Update Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'change-password' %}">Update Password</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+          </div>
+          {% else %}
+
+          <!-- Not Logged In -->
+          <div class="justify-content-end">
+            <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-light"
+              >Register</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    <nav class="navbar bg-body-tertiary py-5 navbar-dark">
+      <div class="container-fluid">
+        <form class="container-fluid" action="/" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Location"
+              value=""
+              name="location"
+            />
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Concert Name"
+              aria-label="Username"
+              name="concert"
+            />
+            <input
+              type="date"
+              class="form-control me-2"
+              placeholder="yyyy-mm-dd"
+              name="date"
+            />
+            <button type="submit" class="btn btn-secondary" value="grey">
+              Search
+            </button>
+          </div>
+        </form>
+        <br />
+      </div>
+    </nav>
+    <br />
+    <div class="container">
+      {% if errors %}
+      <p> 
+        <ul>
+          {% for error in errors %}
+          <li class='errors'>{{error}}</li>
+          {% endfor %}
+        </ul>
+      </p>
+      {% endif %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Concert</th>
+          <th scope="col">Ticket</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Cost</th>
+          <th scope="col">Remove</th>
+          <th scope="col">Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items%}
+        <tr>
+          <td>{{item.ticket.concert}}</td>
+          <td>{{item.ticket.seat_type}}</td>
+          <td>{{item.quantity}}</td>
+          <td
+            class="cost"
+            qty="{{item.quantity}}"
+            price="{{item.ticket.price}}"
+          >
+            Cost
+          </td>
+          <td><a href='{% url "remove-item" item.id %}' class="btn btn-danger">Remove Item</a></td>
+          <td><a href='{% url "update-item" item.id %}' class="btn btn-primary">Update Item</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="container">
+    <p id='cartTotal' style="font-size: large; font-weight: bold; text-align: end; padding-right: 10px;"> Total $</p>
+    {% if not errors %}
+    <p style="text-align: end; padding-right: 10px;"><a href="{% url 'checkout' %}" class="btn btn-success"> Proceed to Checkout </a></p>
+    {% endif %}
+  </div>
+  </body>
+  <script>
+    // get all rows in the table body
+    const rows = document.querySelectorAll("tbody tr");
+    let cartTotal = document.querySelector('#cartTotal');
+    let total = 0;
+
+    // iterate through the rows
+    rows.forEach((row) => {
+      // get the qty and price attributes
+      const qty = Number(row.querySelector(".cost").getAttribute("qty"));
+      const price = Number(row.querySelector(".cost").getAttribute("price"));
+
+      // calculate the cost
+      const cost = qty * price;
+      total +=  cost;
+
+      // update the cost column
+      row.querySelector(".cost").textContent = `$${cost.toFixed(2)}`;
+      cartTotal.textContent = `Cart Total: $${total.toFixed(2)}`
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</html>

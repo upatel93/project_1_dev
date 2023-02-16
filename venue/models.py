@@ -44,5 +44,5 @@ class SeatType(models.Model):
             if choice[0] == self.type:
                 seat_type = choice[1]
                 break
-        return f"{self.venue.name} - {seat_type} - {self.num_seats}"
+        return f"{self.venue.name} - {seat_type}"
 
