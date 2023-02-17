@@ -1,7 +1,7 @@
 from django import forms
-from django.forms import ModelForm, TextInput, TimeField, Select,EmailInput,PasswordInput,FileInput, HiddenInput
+from django.forms import ModelForm, TextInput, TimeField, Select,EmailInput,PasswordInput,FileInput, HiddenInput,DateInput
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from ticketkartapp.models import User
+from ticketkartapp.models import User, PaymentMethod
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -39,3 +39,15 @@ class PwdUpdateForm(PasswordChangeForm):
             'password2': PasswordInput(attrs={'class': 'form-control'}),
             'old_password': PasswordInput(attrs={'class': 'form-control'}),
         }
+
+
+class PaymentMethodForm(forms.ModelForm):
+    class Meta:
+        model = PaymentMethod
+        fields = ['payment_type', 'card_number', 'expiry_date', 'cvv']
+        widgets = {
+            'expiry_date':DateInput(attrs={'class': 'form-control'}),
+        }
+
+class BalanceForm(forms.Form):
+    amount = forms.DecimalField(max_digits=6, decimal_places=2)

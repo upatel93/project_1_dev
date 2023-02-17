@@ -49,6 +49,21 @@ def cart_detail(request):
     return render(request, "cartdetail.html",context)
     
 @login_required(login_url='login')
+def order_detail(request,order_id):
+    user = request.user
+    order = Order.objects.get(pk=order_id)
+    orderItems = OrderItem.objects.select_related('ticket').filter(order=order)
+
+    context = {
+        "user" : user,
+        "order" : order,
+        "items" : orderItems
+    }
+
+    return render(request, "orderdetail.html",context)
+
+
+@login_required(login_url='login')
 def remove_item(request,item_id):
     item = CartItem.objects.get(pk=item_id)
 

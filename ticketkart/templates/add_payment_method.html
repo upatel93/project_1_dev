@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Adding Payment Cards: {{user.name}}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <style>
       .navbar {
@@ -101,14 +101,34 @@
       </div>
     </nav>
     <br />
-    <div class="bg-light p-4 container" style="max-width: 50%; min-width: 400px ;">
-      <p>Are you sure you want to remove {{item}}?</p>
-      <form action="" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger mr-2">Yes</button>
-        <a href="{% url 'cart-detail' %}" class="btn btn-secondary">Cancel</a>
-      </form>
-    </div>
+   <div class="container" style="max-width: 500px; max-height: 500px;" >
+    <form action="" method="post" id="myform">
+      {% csrf_token %}
+      {{form.as_p}}
+      <button type="submit" class="btn btn-primary">Add Card</button>
+    </form>
+  </div>
+  <script>
+    window.addEventListener('load', function() {
+    const form = document.querySelector('#myform');
+    const paymentTypeField = form.querySelector('#id_payment_type');
+    const cardNumberField = form.querySelector('#id_card_number');
+    const expiryDateField = form.querySelector('#id_expiry_date');
+    const cvvField = form.querySelector('#id_cvv');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // Add Bootstrap classes
+    form.classList.add('form-horizontal');
+    paymentTypeField.classList.add('form-control');
+    cardNumberField.classList.add('form-control');
+    expiryDateField.classList.add('form-control');
+    cvvField.classList.add('form-control');
+    submitButton.classList.add('btn', 'btn-primary');
+
+    // Change expiry date field to a date field
+    expiryDateField.type = 'date';
+});
+  </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
   </body>
 </html>

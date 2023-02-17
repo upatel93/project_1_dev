@@ -50,7 +50,10 @@
           />
             </button>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/">Home</a></li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'cart-detail' %}">My Cart</a></li>
+              <li><a class="dropdown-item" href="{% url 'user-profile' %}">My Profile</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'update-user' %}">Update Profile</a></li>
               <li><a class="dropdown-item" href="{% url 'change-password' %}">Update Password</a></li>
@@ -126,6 +129,7 @@
           <th scope="col">Update</th>
         </tr>
       </thead>
+      {% if items %}
       <tbody>
         {% for item in items%}
         <tr>
@@ -144,12 +148,19 @@
         </tr>
         {% endfor %}
       </tbody>
+      {% else %}
+      <tfoot>
+        <p> No Items in The Cart</p>
+      </tfoot>
+      {% endif %}
     </table>
   </div>
   <div class="container">
-    <p id='cartTotal' style="font-size: large; font-weight: bold; text-align: end; padding-right: 10px;"> Total $</p>
+    <p id='cartTotal' style="font-size: large; font-weight: bold; text-align: end; padding-right: 10px;"></p>
     {% if not errors %}
+    {% if items %}
     <p style="text-align: end; padding-right: 10px;"><a href="{% url 'checkout' %}" class="btn btn-success"> Proceed to Checkout </a></p>
+    {% endif %}
     {% endif %}
   </div>
   </body>

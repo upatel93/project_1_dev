@@ -1,0 +1,206 @@
+<!-- context = {
+    "user" : user,
+    "order" : orders,
+    "payment_methods": payment_methods
+} -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TicketKart - book your tickets</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+    <style>
+      .navbar {
+        background-image: linear-gradient(to left, darkslategrey, black);
+      }
+      #body {
+        background-color: darkslategray;
+      }
+      .new {
+        max-width: 400px;
+        max-height: 200px;
+      }
+      .card-text {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary navbar-dark">
+      <div class="container-fluid">
+        <h3 class="text-white">
+          <a href="/" class="text-white navbar-brand">
+            <img
+              src="/images/logo-white.png"
+              width="40px"
+              height="40px"
+              alt=""
+              srcset=""
+            />
+            ticketKart</a
+          >
+        </h3>
+        <div class="justify-content-end">
+          {% if request.user.is_authenticated %}
+          <div class="btn-group dropstart">
+            <button
+              type="button"
+              class="btn btn-secondary dropdown-toggle"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="{{request.user.avatar.url}}"
+                alt="Profile Picture"
+                width="40px"
+                height="40px"
+                style="border-radius: 50%"
+              />
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/">Home</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'cart-detail' %}">My Cart</a></li>
+              <li><a class="dropdown-item" href="{% url 'user-profile' %}">My Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'update-user' %}">Update Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'change-password' %}">Update Password</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+          </div>
+          {% else %}
+
+          <!-- Not Logged In -->
+          <div class="justify-content-end">
+            <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-light"
+              >Register</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    <nav class="navbar bg-body-tertiary py-5 navbar-dark">
+      <div class="container-fluid">
+        <form class="container-fluid" action="/" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Location"
+              value=""
+              name="location"
+            />
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Concert Name"
+              aria-label="Username"
+              name="concert"
+            />
+            <input
+              type="date"
+              class="form-control me-2"
+              placeholder="yyyy-mm-dd"
+              name="date"
+            />
+            <button type="submit" class="btn btn-secondary" value="grey">
+              Search
+            </button>
+          </div>
+        </form>
+        <br />
+      </div>
+    </nav>
+    <br />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-4">
+            <ul class="list-group">
+                <li class="list-group-item" style="text-align: center;"><img
+                    src="{{user.avatar.url}}"
+                    alt="Profile Picture"
+                    width="200x"
+                    height="200px"
+                    class="rounded"
+                  /></li>
+                <li class="list-group-item active">{{user.name}}</li>
+                {% if user.is_retailer %}
+                <li class="list-group-item">Account Type : Retailer</li>
+                {% else %}
+                <li class="list-group-item">Account Type : Normal </li>
+                {% endif %}
+                <li class="list-group-item">Balance: ${{user.balance}} CAD</li>
+                <li class="list-group-item">Email : {{user.email}}</li>
+                <li class="list-group-item"><span></span style="margin-bottom : 5px;"> Cards on Account </span><br>
+                    {% for pm in payment_methods %} 
+                    <span>&nbsp &nbsp{{ pm.get_payment_type_display }} - ending in {{ pm.card_number|slice:"-4:" }}</span> <br>
+                    {% endfor %}
+                </li>
+              </ul>
+        </div>
+        <div class="col-6">
+            <h3>My Orders</h3>
+          {% if orders %}
+          <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Order Date and Time
+                    </th>
+                    <th>
+                        Details
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>
+              {{order.placed_at|date}} - {{order.placed_at|time}}
+            </td>
+            <td>
+              <a href="{% url 'order-detail' order.id %}" class="btn btn-outline-primary"> Details </a>
+            </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+         {% else %}
+          <h3>You Don't have any orders.</h3>
+          {% endif %}
+        </div>
+        <div class="col-2">
+            <div class="row">
+                <div class="col">
+                  <div class="list-group" id="list-tab" role="tablist">
+                    <a class="list-group-item list-group-item-action active" href="/" role="tab" aria-controls="list-home">Home</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'cart-detail' %}" role="tab" aria-controls="list-profile">My Cart</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'update-user' %}" role="tab" aria-controls="list-messages">Update Profile</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'change-password' %}" role="tab" aria-controls="list-messages">Change Password</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'add-payment-method' %}" role="tab" aria-controls="list-messages">Add New Card</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'add-balance' %}" role="tab" aria-controls="list-messages">Add Balance</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'logout' %}" role="tab" aria-controls="list-settings">Logout</a>
+                  </div>
+                </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

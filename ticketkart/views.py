@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate,  update_session_auth_hash
-from concert.models import Concert
-from ticketkartapp.models import User
+from concert.models import Concert, ConcertTicket
+from cart.models import Cart, CartItem,Order, OrderItem
+from ticketkartapp.models import User, PaymentMethod
 import datetime
-from .forms import CustomUserCreationForm, PwdUpdateForm, UserForm
+from .forms import CustomUserCreationForm, PwdUpdateForm, UserForm, PaymentMethodForm, BalanceForm
+from decimal import Decimal
 
 
 def home(request):
@@ -65,7 +67,7 @@ def updateUser(request):
         if form.is_valid():
             form.save()
             # print(form.errors)
-            return redirect('home')
+            return redirect('user-profile')
 
     return render(request, 'update.html', {'form': form})
 
@@ -78,7 +80,7 @@ def updateUserPwd(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)  # Important!
-            return redirect('home')
+            return redirect('user-profile')
     else:
         form = PwdUpdateForm(request.user)
     return render(request, 'updatepwd.html', {'form': form})
@@ -107,3 +109,65 @@ def loginPage(request):
             messages.error(request, 'Username OR password does not exit')
 
     return render(request, 'login.html')
+
+@login_required(login_url='login')
+def add_payment_method(request):
+
+    if request.method == 'POST':
+        form = PaymentMethodForm(request.POST)
+        if form.is_valid():
+            payment_method = form.save(commit=False)
+            payment_method.user = request.user
+            payment_method.save()
+            return redirect('add-balance')
+    else:
+        form = PaymentMethodForm()
+
+    return render(request, 'add_payment_method.html', {'form': form})
+
+
+
+
+@login_required(login_url='login')
+def add_balance(request):
+    payment_methods = PaymentMethod.objects.filter(user=request.user)
+
+    if not payment_methods:
+        return redirect('add-payment-method')
+
+    if request.method == 'POST':
+        form = BalanceForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data.get('amount')
+            payment_method_id = request.POST.get('payment_method')
+            payment_method = PaymentMethod.objects.get(id=payment_method_id)
+
+            if not payment_method.verified:
+                payment_method.verify()
+                if not payment_method.verified:
+                    return redirect('add_balance')
+
+            if payment_method.make_payment(amount):
+                request.user.balance += Decimal(amount)
+                request.user.save()
+                return redirect('user_profile')
+    else:
+        form = BalanceForm()
+
+    return render(request, 'add_balance.html', {'form': form, 'payment_methods': payment_methods})
+
+
+@login_required(login_url='login')
+def user_profile(request):
+    user = request.user
+    orders = Order.objects.filter(customer=user)[:5]
+    payment_methods = PaymentMethod.objects.filter(user=user)
+
+    context = {
+        "user" : user,
+        "orders" : orders,
+        "payment_methods": payment_methods
+    }
+
+    return render(request, "profile.html",context)
+
